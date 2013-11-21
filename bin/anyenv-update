@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Summary: Update all **env and all installed plugins.
+#
+# Usage: anyenv update
+
+set -eo pipefail
+[ -n "$ANYENV_DEBUG" ] && set -x
+set -u
+
+anyenv_update () {
+  if [ -d .git ]; then
+    echo "Updating '$1'..."
+    git pull
+  else
+    echo "Skipping '$1'"
+  fi
+  echo
+}
+
+anyenv_update_plugins () {
+  shopt -s nullglob
+  for plugin in plugins/*; do
+    pushd "$plugin" >/dev/null
+    anyenv_update "$(basename $plugin)"
+    popd >/dev/null
+  done
+  shopt -u nullglob
+}
+
+cd "${ANYENV_ROOT:-$(anyenv root)}"
+anyenv_update anyenv
+anyenv_update_plugins
+
+for env in $(anyenv envs); do
+  ENV_ROOT_VALUE=$(echo ${env}_ROOT | tr "[a-z]" "[A-Z]")
+  eval cd "\${${ENV_ROOT_VALUE}:-\$($env root)}"
+  anyenv_update "$env"
+  anyenv_update_plugins
+done
