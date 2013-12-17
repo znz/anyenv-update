@@ -3,9 +3,8 @@
 #
 # Usage: anyenv update
 
-set -eo pipefail
-[ -n "$ANYENV_DEBUG" ] && set -x
-set -u
+set -euo pipefail
+[ -n "${ANYENV_DEBUG-}" ] && set -x
 
 anyenv_update () {
   if [ -d .git ]; then
