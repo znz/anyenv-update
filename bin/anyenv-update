@@ -12,8 +12,7 @@
 #
 # For detailed information, see: https://github.com/znz/anyenv-update
 #
-
-set -e
+set -eo pipefail
 [ -n "$ANYENV_DEBUG" ] && set -x
 
 # Provide anyenv completions
@@ -72,31 +71,34 @@ get_allenvs () {
 }
 
 git_currentbranch () {
-  command git branch | grep '*' | awk '{print $2}'
+  branch=$(command git branch | grep '*' | awk '{print $2}')
+  if [[ "$branch" = *'HEAD detached'* ]]; then
+    echo "$branch"
+  else
+    echo 'master'
+  fi
 }
 
 git () {
   if [ -n "$NOOP" ]; then
     # dry run
     echo git "$@" | indent_output
-    return ${PIPESTATUS[0]}
   elif [ -n "$QUIET" ]; then
     # mute all
     command git "$@" &>/dev/null
   elif [ -n "$VERBOSE" ]; then
     # output all
     command git "$@" 2>&1 | indent_output
-    return ${PIPESTATUS[0]}
   else
     # output only stderr
     command git "$@" 2>&1 >/dev/null | indent_output
-    return ${PIPESTATUS[0]}
   fi
 }
 
 print_use_forceopt () {
   if [ -z "$QUIET" ]; then
-    printf ' \e[1;33m|  Failed to update. Use `verbose` option for detailed, or `force` option.\e[0m\n'
+    printf " ${fail_color}|  %s${reset}\n" \
+      'Failed to update. Use `verbose` option for detailed, or `force` option.'
   fi
 }
 
@@ -107,8 +109,10 @@ anyenv_update () {
       echo "cd $(pwd)" | indent_output
     fi
     if [ -n "$FORCE" ]; then
+      branch=$(git_currentbranch)
       git fetch --prune
-      git reset --hard "origin/$(git_currentbranch)"
+      git checkout "$branch"
+      git reset --hard "origin/$branch"
     else
       git pull --no-rebase --ff || print_use_forceopt
     fi
@@ -166,9 +170,11 @@ done
 # Set colored output for TTY
 if [ -t 1 ]; then
   color="\e[1;32m"
+  fail_color="\e[1;33m"
   reset="\e[0m"
 else
   color=""
+  fail_color=""
   reset=""
 fi
 
@@ -187,7 +193,7 @@ for env in $TARGET_ENVS; do
   ENV_ROOT_VALUE=$(echo "${env}_ROOT" | tr '[:lower:]' '[:upper:]')
   ENV_ROOT_VALUE=$(eval echo "\${${ENV_ROOT_VALUE}:-\$($env root)}")
   
-  cd $ENV_ROOT_VALUE
+  cd "$ENV_ROOT_VALUE"
   anyenv_update "$env"
   [ -n "$WITHOUT_PLUGIN" ] || anyenv_update_plugins "$env"
 done
