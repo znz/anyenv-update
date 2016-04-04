@@ -72,11 +72,7 @@ get_allenvs () {
 
 git_currentbranch () {
   branch=$(command git branch | grep '*' | awk '{print $2}')
-  if [[ "$branch" = *'HEAD detached'* ]]; then
-    echo "$branch"
-  else
-    echo 'master'
-  fi
+  echo "$branch"
 }
 
 git () {
