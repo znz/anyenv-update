@@ -45,7 +45,7 @@ parse_options () {
         while option="${arg:$index:1}"; do
           [ -n "$option" ] || break
           OPTIONS[${#OPTIONS[*]}]="$option"
-          index=$(($index+1))
+          index=$((index+1))
         done
       fi
     else
@@ -67,11 +67,11 @@ print_colored() {
 }
 
 get_allenvs () {
-  echo 'anyenv' $(anyenv-envs)
+  echo "anyenv $(anyenv-envs | tr '\n' ' ')"
 }
 
 git_currentbranch () {
-  branch=$(command git branch | grep '*' | awk '{print $2}')
+  branch=$(command git branch | grep '^\*' | awk '{print $2}')
   echo "$branch"
 }
 
@@ -87,6 +87,7 @@ git () {
     command git "$@" 2>&1 | indent_output
   else
     # output only stderr
+    # shellcheck disable=SC2069
     command git "$@" 2>&1 >/dev/null | indent_output
   fi
 }
@@ -94,7 +95,7 @@ git () {
 print_use_forceopt () {
   if [ -z "$QUIET" ]; then
     printf " ${fail_color}|  %s${reset}\n" \
-      'Failed to update. Use `verbose` option for detailed, or `force` option.'
+      "Failed to update. Use 'verbose' option for detailed, or 'force' option."
   fi
 }
 
@@ -179,7 +180,7 @@ if [ -n "$NOOP" ] && [ -n "$QUIET" ]; then
   print_colored "Both --noop and --quiet given; ignoring --quiet" >&2
 fi
 
-TARGET_ENVS="${ARGUMENTS[@]}"
+TARGET_ENVS="${ARGUMENTS[*]}"
 if [ "${#ARGUMENTS[@]}" -eq 0 ]; then
   # set all envs when no args are given
   TARGET_ENVS=$(get_allenvs)
