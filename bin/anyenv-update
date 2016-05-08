@@ -20,7 +20,7 @@ anyenv_update_plugins () {
   shopt -s nullglob
   for plugin in plugins/*; do
     pushd "$plugin" >/dev/null
-    anyenv_update "$(basename $plugin)"
+    anyenv_update "$(basename "$plugin")"
     popd >/dev/null
   done
   shopt -u nullglob
@@ -31,7 +31,7 @@ anyenv_update anyenv
 anyenv_update_plugins
 
 for env in $(anyenv envs); do
-  ENV_ROOT_VALUE=$(echo ${env}_ROOT | tr "[a-z]" "[A-Z]")
+  ENV_ROOT_VALUE=$(echo "${env}_ROOT" | tr "[a-z]" "[A-Z]")
   eval cd "\${${ENV_ROOT_VALUE}:-\$($env root)}"
   anyenv_update "$env"
   anyenv_update_plugins
