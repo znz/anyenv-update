@@ -31,7 +31,7 @@ anyenv_update anyenv
 anyenv_update_plugins
 
 for env in $(anyenv envs); do
-  ENV_ROOT_VALUE=$(echo "${env}_ROOT" | tr "a-z" "A-Z")
+  ENV_ROOT_VALUE=$(echo "${env}_ROOT" | tr '[:lower:]' '[:upper:]')
   eval cd "\${${ENV_ROOT_VALUE}:-\$($env root)}"
   anyenv_update "$env"
   anyenv_update_plugins
