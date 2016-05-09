@@ -9,8 +9,13 @@ addons:
     packages:
     - shellcheck
 
+before_script:
+- git clone https://github.com/riywo/anyenv ~/.anyenv
+
 script:
 - shellcheck bin/anyenv-update
+- git -C "${HOME}/.anyenv" reset --hard HEAD^
+- ANYENV_ROOT="${HOME}/.anyenv" PATH="${HOME}/.anyenv/libexec:$PATH"  ./bin/anyenv-update
 
 matrix:
   fast_finish: true
