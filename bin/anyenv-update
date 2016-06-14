@@ -26,6 +26,13 @@ if [ "$1" = "--complete" ]; then
   exec anyenv-envs
 fi
 
+trap_handler() {
+  kill %1
+  exit 1
+}
+
+trap trap_handler SIGINT
+
 usage () {
   anyenv-help update 2>/dev/null
   [ -z "$1" ] || exit "$1"
