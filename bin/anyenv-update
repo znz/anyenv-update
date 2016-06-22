@@ -26,6 +26,13 @@ if [ "$1" = "--complete" ]; then
   exec anyenv-envs
 fi
 
+if [[ ${BASH_VERSINFO[0]} -lt 4 ]]; then
+  sigint_handler () {
+    exit 130
+  }
+  trap sigint_handler SIGINT
+fi
+
 usage () {
   anyenv-help update 2>/dev/null
   [ -z "$1" ] || exit "$1"
