@@ -17,7 +17,3 @@ Simply clone the repository into the plugins directory:
 ## License
 
 (The MIT License)
-
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/znz/anyenv-update/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-
