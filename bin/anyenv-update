@@ -2,13 +2,14 @@
 #
 # Summary: Update all **env and all installed plugins.
 #
-# Usage: anyenv update [--force] [--verbose|--quiet|--noop] [--without-plugin] [<envs>]
+# Usage: anyenv update [--force] [--verbose|--quiet|--noop] [--without-plugin] [--without-manifest] [<envs>]
 #
-#  -f/--force       Force update
-#  -v/--verbose     Verbose mode: print downloading status to stdout
-#  -q/--quiet       Quiet mode: no printing
-#  -n/--noop        Noop mode: dry run and do nothing
-#  --without-plugin Update envs, but not update plugin of each envs
+#  -f/--force         Force update
+#  -v/--verbose       Verbose mode: print downloading status to stdout
+#  -q/--quiet         Quiet mode: no printing
+#  -n/--noop          Noop mode: dry run and do nothing
+#  --without-plugin   Update envs, but not update plugin of each envs
+#  --without-manifest Update envs, but not anyenv's install manifests
 #
 # For detailed information, see: https://github.com/znz/anyenv-update
 #
@@ -22,6 +23,7 @@ if [ "$1" = "--complete" ]; then
   echo --quiet
   echo --noop
   echo --without-plugin
+  echo --without-manifest
   echo anyenv
   exec anyenv-envs
 fi
@@ -135,12 +137,29 @@ anyenv_update_plugins () {
   shopt -u nullglob
 }
 
+# acts like `anyenv install --update`
+anyenv_install_update () {
+  if [ -z ${ANYENV_DEFINITION_ROOT+x} ]; then
+    # $XDG_CONFIG_HOME/anyenv/anyenv-install or ~/.config/anyenv/anyenv-install
+    ANYENV_DEFINITION_ROOT="${XDG_CONFIG_HOME:-${HOME}/.config}/anyenv/anyenv-install"
+  fi
+  if [ ! -d $ANYENV_DEFINITION_ROOT ]; then
+    printf "${fail_color}Manifest directory doesn't exist: ${ANYENV_DEFINITION_ROOT}${reset}\n"
+    printf "${fail_color}Try anyenv install --init${reset}\n"
+    return 1
+  fi
+  pushd $ANYENV_DEFINITION_ROOT > /dev/null
+  anyenv_update "anyenv manifest directory"
+  popd > /dev/null
+}
+
 # Parse command line flags
 FORCE=""
 VERBOSE=""
 QUIET=""
 NOOP=""
 WITHOUT_PLUGIN=""
+WITHOUT_MANIFEST=""
 
 parse_options "$@"
 for option in "${OPTIONS[@]}"; do
@@ -162,6 +181,9 @@ for option in "${OPTIONS[@]}"; do
     ;;
   "without-plugin" )
     WITHOUT_PLUGIN=true
+    ;;
+  "without-manifest" )
+    WITHOUT_MANIFEST=true
     ;;
   * )
     echo "no such option: ${option}" >&2
@@ -192,12 +214,12 @@ if [ "${#ARGUMENTS[@]}" -eq 0 ]; then
   # set all envs when no args are given
   TARGET_ENVS=$(get_allenvs)
 fi
-
 for env in $TARGET_ENVS; do
   ENV_ROOT_VALUE=$(echo "${env}_ROOT" | tr '[:lower:]' '[:upper:]')
   ENV_ROOT_VALUE=$(eval echo "\${${ENV_ROOT_VALUE}:-\$($env root)}")
-  
+
   cd "$ENV_ROOT_VALUE"
   anyenv_update "$env"
   [ -n "$WITHOUT_PLUGIN" ] || anyenv_update_plugins "$env"
 done
+[ -n "$WITHOUT_MANIFEST" ] || anyenv_install_update
