@@ -139,16 +139,16 @@ anyenv_update_plugins () {
 
 # acts like `anyenv install --update`
 anyenv_install_update () {
-  if [ -z ${ANYENV_DEFINITION_ROOT+x} ]; then
+  if [ -z "${ANYENV_DEFINITION_ROOT+x}" ]; then
     # $XDG_CONFIG_HOME/anyenv/anyenv-install or ~/.config/anyenv/anyenv-install
     ANYENV_DEFINITION_ROOT="${XDG_CONFIG_HOME:-${HOME}/.config}/anyenv/anyenv-install"
   fi
-  if [ ! -d $ANYENV_DEFINITION_ROOT ]; then
-    printf "${fail_color}Manifest directory doesn't exist: ${ANYENV_DEFINITION_ROOT}${reset}\n"
-    printf "${fail_color}Try anyenv install --init${reset}\n"
+  if [ ! -d "$ANYENV_DEFINITION_ROOT" ]; then
+    printf "${fail_color}%s${reset}\n" "Manifest directory doesn't exist: ${ANYENV_DEFINITION_ROOT}"
+    printf "${fail_color}%s${reset}\n" "Try anyenv install --init"
     return 1
   fi
-  pushd $ANYENV_DEFINITION_ROOT > /dev/null
+  pushd "$ANYENV_DEFINITION_ROOT" > /dev/null
   anyenv_update "anyenv manifest directory"
   popd > /dev/null
 }
