@@ -14,7 +14,7 @@ script:
 - shellcheck bin/anyenv-update
 - git -C "${HOME}/.anyenv" reset --hard HEAD^
 - env ANYENV_ROOT="${HOME}/.anyenv" PATH="${HOME}/.anyenv/libexec:$PATH" ./bin/anyenv-update || true
-- env ANYENV_ROOT="${HOME}/.anyenv" PATH="${HOME}/.anyenv/libexec:$PATH" anyenv install --init
+- env ANYENV_ROOT="${HOME}/.anyenv" PATH="${HOME}/.anyenv/libexec:$PATH" anyenv install --force-init
 - env ANYENV_ROOT="${HOME}/.anyenv" PATH="${HOME}/.anyenv/libexec:$PATH" ./bin/anyenv-update
 
 matrix:
