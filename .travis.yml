@@ -1,16 +1,14 @@
 language: bash
 
-sudo: false
+dist: xenial
 
 addons:
   apt:
-    sources:
-    - debian-sid
     packages:
     - shellcheck
 
 before_script:
-- git clone https://github.com/riywo/anyenv ~/.anyenv
+- git clone https://github.com/anyenv/anyenv ~/.anyenv
 
 script:
 - shellcheck bin/anyenv-update
