@@ -1,6 +1,6 @@
 # anyenv-update
 
-This is an [anyenv](https://github.com/riywo/anyenv) plugin that
+This is an [anyenv](https://github.com/anyenv/anyenv) plugin that
 provides `anyenv update` command to update all \*\*env and all plugins.
 
 ## Installation
