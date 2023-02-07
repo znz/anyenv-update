@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 #
-# Summary: Update all **env and all installed plugins.
+# Summary: Update all **env and all installed plugins, including plugins of anyenv itself.
 #
-# Usage: anyenv update [--force] [--verbose|--quiet|--noop] [--without-plugin] [--without-manifest] [<envs>]
+# Usage: anyenv update [--force] [--verbose|--quiet|--noop] [--without-anyenv] [--without-plugin] [--without-manifest] [<envs>]
 #
 #  -f/--force         Force update
 #  -v/--verbose       Verbose mode: print downloading status to stdout
 #  -q/--quiet         Quiet mode: no printing
 #  -n/--noop          Noop mode: dry run and do nothing
+#  --without-anyenv   Update envs, but not update plugin of anyenv itself
 #  --without-plugin   Update envs, but not update plugin of each envs
 #  --without-manifest Update envs, but not anyenv's install manifests
 #
@@ -22,6 +23,7 @@ if [ "$1" = "--complete" ]; then
   echo --verbose
   echo --quiet
   echo --noop
+  echo --without-anyenv
   echo --without-plugin
   echo --without-manifest
   echo anyenv
@@ -137,6 +139,18 @@ anyenv_update_plugins () {
   shopt -u nullglob
 }
 
+anyenv_update_anyenv_plugins () {
+  shopt -s nullglob
+  pushd "$(anyenv root)" >/dev/null
+  for plugin in plugins/*; do
+    pushd "$plugin" >/dev/null
+    anyenv_update "$1/$(basename "$plugin")"
+    popd >/dev/null
+  done
+  popd
+  shopt -u nullglob
+}
+
 # acts like `anyenv install --update`
 anyenv_install_update () {
   if [ -z "${ANYENV_DEFINITION_ROOT+x}" ]; then
@@ -159,6 +173,7 @@ VERBOSE=""
 QUIET=""
 NOOP=""
 WITHOUT_PLUGIN=""
+WITHOUT_ANYENV=""
 WITHOUT_MANIFEST=""
 
 parse_options "$@"
@@ -178,6 +193,9 @@ for option in "${OPTIONS[@]}"; do
     ;;
   "n" | "noop" )
     NOOP=true
+    ;;
+  "without-anyenv" )
+    WITHOUT_ANYENV=true
     ;;
   "without-plugin" )
     WITHOUT_PLUGIN=true
@@ -208,6 +226,8 @@ if [ -n "$NOOP" ] && [ -n "$QUIET" ]; then
   QUIET=""
   print_colored "Both --noop and --quiet given; ignoring --quiet" >&2
 fi
+
+[ -n "$WITHOUT_ANYENV" ] || anyenv_update_anyenv_plugins anyenv
 
 TARGET_ENVS="${ARGUMENTS[*]}"
 if [ "${#ARGUMENTS[@]}" -eq 0 ]; then
